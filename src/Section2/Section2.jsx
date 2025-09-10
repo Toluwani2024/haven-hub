@@ -1,166 +1,187 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 const testimonials = [
   {
     quote:
-      "Our experience with Haven Hub was outstanding. Their team's dedication and professionalism made finding our dream home a breeze.",
+      "Our experience with Haven Hub was outstanding. Their dedication and professionalism made finding our dream home a breeze.",
     name: "Wade Warren",
-    location: "USA, California",
+    location: "California, USA",
   },
   {
     quote:
-      "Transparent process from inspection to closing. I felt guided at every step and got a great deal in a prime location.",
-    name: "Esther Howard",
+      "Seamless process from viewing to closing. Clear communication and great market insight. Highly recommended!",
+    name: "Aisha Bello",
     location: "Lagos, Nigeria",
   },
   {
     quote:
-      "Fast responses, curated options, and honest advice. Easily the best real estate experience I've had.",
-    name: "Courtney Henry",
-    location: "Abuja, Nigeria",
+      "They understood our needs and guided us to the right investment. Excellent service and follow-through.",
+    name: "Daniel Mensah",
+    location: "Accra, Ghana",
   },
   {
     quote:
-      "Professional agents and clear communication. We closed quickly and stress-free.",
-    name: "Jacob Jones",
-    location: "Port Harcourt, Nigeria",
+      "The team was responsive and honest. We found a great apartment within our budget in under two weeks.",
+    name: "Chiamaka U.",
+    location: "Abuja, Nigeria",
   },
 ];
 
-export const Section2 = () => {
-  const [index, setIndex] = useState(0);
-  const count = testimonials.length;
+function MobileAutoCarousel({ items }) {
+  const [index, setIndex] = React.useState(0);
+  const trackRef = React.useRef(null);
+  const wrapRef = React.useRef(null);
+  const hoveringRef = React.useRef(false);
+  const timerRef = React.useRef(null);
+  const [inView, setInView] = React.useState(true);
 
-  // autoplay every 5s, pause on hover
-  const timerRef = useRef(null);
-  const containerRef = useRef(null);
-  const isHoveringRef = useRef(false);
+  // Respect reduced-motion
+  const prefersReduced = React.useMemo(
+    () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false,
+    []
+  );
 
-  useEffect(() => {
-    start();
-    return stop;
-  }, [index]);
+  // Pause when off-screen
+  React.useEffect(() => {
+    if (!wrapRef.current) return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0].isIntersecting),
+      { threshold: [0, 0.25] }
+    );
+    io.observe(wrapRef.current);
+    return () => io.disconnect();
+  }, []);
 
-  const start = () => {
-    stop();
+  // Autoplay (every 4.5s)
+  React.useEffect(() => {
+    if (prefersReduced || !inView || items.length <= 1) return;
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      if (!isHoveringRef.current) {
-        setIndex((i) => (i + 1) % count);
+      if (!hoveringRef.current) {
+        setIndex((i) => (i + 1) % items.length);
       }
-    }, 5000);
-  };
+    }, 4500);
+    return () => clearInterval(timerRef.current);
+  }, [prefersReduced, inView, items.length]);
 
-  const stop = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-  };
+  // Scroll to current slide
+  React.useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const slide = el.children[index];
+    if (!slide) return;
+    // smooth scroll works on iOS & Android Chrome
+    slide.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth", inline: "center" });
+  }, [index, prefersReduced]);
 
-  const goTo = (i) => setIndex((i + count) % count);
-  const prev = () => goTo(index - 1);
-  const next = () => goTo(index + 1);
-
-  // touch swipe support
-  const touchStartX = useRef(0);
-  const touchDeltaX = useRef(0);
-
+  // Touch swipe (Android/Samsung & iPhone)
+  const startX = React.useRef(0);
+  const dx = React.useRef(0);
   const onTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchDeltaX.current = 0;
+    startX.current = e.touches[0].clientX;
+    dx.current = 0;
   };
   const onTouchMove = (e) => {
-    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+    dx.current = e.touches[0].clientX - startX.current;
   };
   const onTouchEnd = () => {
-    const threshold = 50; 
-    if (touchDeltaX.current > threshold) prev();
-    else if (touchDeltaX.current < -threshold) next();
+    const t = 50;
+    if (dx.current > t) setIndex((i) => (i - 1 + items.length) % items.length);
+    if (dx.current < -t) setIndex((i) => (i + 1) % items.length);
   };
 
   return (
-    <section
-      className="scroll-mt-20 max-w-7xl mx-auto px-4 py-20"
-      onMouseEnter={() => (isHoveringRef.current = true)}
-      onMouseLeave={() => (isHoveringRef.current = false)}
+    <div
+      ref={wrapRef}
+      className="sm:hidden"
+      onMouseEnter={() => (hoveringRef.current = true)}
+      onMouseLeave={() => (hoveringRef.current = false)}
     >
-      {/* Header */}
-      <div className="text-center max-w-2xl mx-auto">
-        <h3 className="text-3xl md:text-4xl font-bold text-white">What Our Clients Say</h3>
-        <p className="mt-3 text-[--color-muted] text-sm md:text-base">
-          Read the success stories and heartfelt testimonials from our valued clients.
-          Discover why they chose Haven Hub for their real estate needs.
-        </p>
-        <button className="mt-6 rounded-lg px-5 py-2.5 bg-accent text-black font-medium hover:opacity-90 transition">
-          View All Testimonials
-        </button>
+      <div
+        ref={trackRef}
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {items.map((t, i) => (
+          <article
+            key={i}
+            className="snap-center shrink-0 w-[85%] rounded-xl border border-white/5 bg-[--color-bg] p-5"
+          >
+            <p className="text-sm text-white/90">“{t.quote}”</p>
+            <div className="mt-4">
+              <p className="font-semibold text-white">{t.name}</p>
+              <p className="text-xs text-[--color-muted]">{t.location}</p>
+            </div>
+          </article>
+        ))}
       </div>
 
-      {/* Carousel */}
-      <div className="relative mt-10">
-        {/* viewport */}
-        <div
-          ref={containerRef}
-          className="overflow-hidden rounded-xl border border-white/5 bg-[--color-surface]"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          {/* track */}
-          <div
-            className="flex transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${index * 100}%)` }}
-          >
-            {testimonials.map((t, i) => (
-              <article key={i} className="min-w-full p-8 md:p-10">
-                <div className="max-w-3xl mx-auto">
-                  <div className="mb-4 text-accent text-4xl leading-none">“</div>
-                  <p className="text-base md:text-lg text-white/90 leading-relaxed">
-                    {t.quote}
-                  </p>
+      {/* dots */}
+      <div className="mt-3 flex justify-center gap-2">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            aria-label={`Go to testimonial ${i + 1}`}
+            className={`h-2.5 rounded-full transition-all ${
+              i === index ? "w-6 bg-accent" : "w-2.5 bg-white/30 hover:bg-white/50"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white font-semibold">
-                      {t.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{t.name}</p>
-                      <p className="text-xs text-[--color-muted]">{t.location}</p>
-                    </div>
-                  </div>
+function Section2() {
+  return (
+    <section
+      id="about"
+      className="scroll-mt-20 bg-[--color-surface] px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto">
+          <h3 className="text-2xl sm:text-3xl font-bold text-white">What Our Clients Say</h3>
+          <p className="mt-3 text-[--color-muted] text-sm sm:text-base">
+            Read success stories and heartfelt testimonials from our clients. Discover why they
+            chose Haven Hub for their real estate needs.
+          </p>
+
+          <a
+            href="#contact"
+            className="mt-5 inline-flex rounded-lg px-4 py-2 bg-accent text-black font-medium hover:opacity-90 transition"
+          >
+            View All Testimonials
+          </a>
+        </div>
+
+        {/* Mobile: auto-slide carousel; Tablet+: grid */}
+        <div className="mt-8">
+          {/* Mobile (auto-slide) */}
+          <MobileAutoCarousel items={testimonials} />
+
+          {/* Tablet+ grid */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <article
+                key={i}
+                className="rounded-xl border border-white/5 bg-[--color-bg] p-6 h-full"
+              >
+                <p className="text-[15px] md:text-base text-white/90">“{t.quote}”</p>
+                <div className="mt-4">
+                  <p className="font-semibold text-white">{t.name}</p>
+                  <p className="text-sm text-[--color-muted]">{t.location}</p>
                 </div>
               </article>
             ))}
           </div>
         </div>
-
-        {/* Controls */}
-        <button
-          onClick={prev}
-          aria-label="Previous"
-          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 w-10 h-10 grid place-items-center"
-        >
-          ‹
-        </button>
-        <button
-          onClick={next}
-          aria-label="Next"
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 w-10 h-10 grid place-items-center"
-        >
-          ›
-        </button>
-
-        {/* Dots */}
-        <div className="mt-4 flex justify-center gap-2">
-          {testimonials.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`h-2.5 rounded-full transition-all ${
-                i === index ? "w-6 bg-accent" : "w-2.5 bg-white/20 hover:bg-white/40"
-              }`}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );
-};
+}
+
+export default Section2;

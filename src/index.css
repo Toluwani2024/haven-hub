@@ -1,25 +1,33 @@
 @import "tailwindcss";
+
+/* your existing @theme … */
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
 
   /* Colors */
-   --color-bg:       #0A0F1C;
-  --color-surface:   #0B1220;
-  --color-primary:   #0F172A; /* Deep Navy */
-  --color-accent:    #F59E0B; /* Gold */
-  --color-muted:     #94A3B8; /* Slate-400 */
+  --color-bg:       #0A0F1C;
+  --color-surface:  #0B1220;
+  --color-primary:  #0F172A;
+  --color-accent:   #F59E0B;
+  --color-muted:    #94A3B8;
 
-  
   /* Radii & shadows */
   --radius-lg: 1rem;
   --shadow-card: 0 10px 25px rgb(0 0 0 / 0.25);
+
+  /* 📱 extra phone breakpoints */
+  --breakpoint-xs: 360px;      /* small Android */
+  --breakpoint-iphone: 390px;  /* iPhone 12/13/14 */
+  --breakpoint-plus: 430px;    /* Pro Max / large phones */
 }
 
 /* Global base */
-:root { color-scheme: dark;  }
+:root { color-scheme: dark; }
 html, body, #root { height: 100%; }
 body { @apply bg-[--color-bg] text-white font-sans; }
 
-html {
-  scroll-behavior: smooth;
+/* Optional: respect iOS safe area */
+body {
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
 }
