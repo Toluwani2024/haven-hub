@@ -22,7 +22,14 @@
 }
 
 /* Global base */
-:root { color-scheme: dark; }
+:root
+ { color-scheme: dark; }
+
+
+ :root {
+  --color-accent: #f59e0b; /* Tailwind amber-500 (goldish) */
+}
+
 html, body, #root { height: 100%; }
 body { @apply bg-[--color-bg] text-white font-sans; }
 

@@ -63,9 +63,9 @@ export default function Navbar() {
             className="inline-flex items-center justify-center rounded-full px-4 py-2
                        bg-[--color-accent] text-black font-medium
                        shadow-[0_6px_18px_rgba(245,158,11,0.35)]
-                       hover:bg-[--color-accent] hover:brightness-100
-                       active:scale-[.98]
-                       focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/50
+                       hover:bg-yellow-500 hover:text-black
+                       active:bg-yellow-400 active:scale-[.97]
+                       focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/60
                        transition"
           >
             Contact Us
@@ -109,14 +109,15 @@ export default function Navbar() {
               </a>
             ))}
 
+            {/* Mobile CTA */}
             <a
               href="#contact"
               className="mt-2 inline-flex items-center justify-center rounded-xl px-4 py-2
                          bg-[--color-accent] text-black font-medium
                          shadow-[0_6px_18px_rgba(245,158,11,0.35)]
-                         hover:bg-[--color-accent] hover:brightness-100
-                         active:scale-[.98]
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/50
+                         hover:bg-yellow-500 hover:text-black
+                         active:bg-yellow-400 active:scale-[.97]
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-accent]/60
                          transition"
             >
               Contact Us
@@ -127,3 +128,4 @@ export default function Navbar() {
     </header>
   );
 }
+ 

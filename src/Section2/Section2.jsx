@@ -142,6 +142,8 @@ function Section2() {
       className="scroll-mt-20 bg-[--color-surface] px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
     >
       <div className="max-w-7xl mx-auto">
+
+        
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto">
           <h3 className="text-2xl sm:text-3xl font-bold text-white">What Our Clients Say</h3>
